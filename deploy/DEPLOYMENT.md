@@ -61,8 +61,12 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
   de estos controles, pero no sustituyen pruebas RLS con dos cuentas reales.
 - El chatbot está retirado (HTTP 410). El historial guarda análisis; no hay una
   entidad que vincule fotografías sucesivas de la misma lesión para compararlas.
-- Docker no tiene el motor activo y el Python disponible no tiene NumPy ni
-  TensorFlow: no se ejecutó la CNN real. Un build web no valida predicciones.
+- Se construyó y ejecutó la CNN real en Docker Desktop Linux/amd64 con 2 CPU
+  y límite de 2 GiB: cinco pruebas del adaptador pasan, al igual que el smoke
+  test de pesos y la prueba HTTP en el emulador de Lambda. Primera llamada
+  del handler: 5,39 s; mediana posterior: 0,22 s; pico RSS: unos 611 MiB.
+  Se usó una imagen sintética: las etiquetas, la normalización del entrenamiento
+  y la precisión con lesiones reales siguen sin confirmarse. No se desplegó AWS.
 
 ## 1. Configurar Supabase
 

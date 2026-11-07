@@ -2,21 +2,23 @@
 
 Este paquete ejecuta directamente `model.keras` en CPU mediante un contenedor de Lambda. No necesitas convertir a `.tflite` para esta opción. Los pesos están excluidos de Git y deben prepararse en cada copia del repositorio.
 
-Revisión del 7 de noviembre de 2026: la ruta proporcionada era una carpeta Keras descomprimida. Se reconstruyó localmente `model.keras` con sus tres archivos (`config.json`, `metadata.json`, `model.weights.h5`). El ZIP reconstruido pesa 43,350,323 bytes y su SHA256 es `4fb1fe0ee4bc5be18b6f4bf715637cde8fe7b7e48289b9fbf771c1c977a892dd`, registrado en `model_contract.json` como `reconstructed_archive_sha256`. La estructura coincide con la entrada RGB 224×224 y salida de siete clases; no se ejecutó TensorFlow. El código de entrenamiento no está en este checkout. Las observaciones de entrenamiento y métricas que siguen son antecedentes de la documentación heredada y requieren comprobarse con el notebook original.
+Revisión del 7 de noviembre de 2026: se construyó la imagen y se ejecutaron los pesos reales en Docker Desktop con TensorFlow CPU 2.19 y Keras 3.10. Las pruebas de ejecución usan una imagen sintética y no evalúan precisión dermatológica. El notebook de entrenamiento y el conjunto de test no están disponibles.
 
-## Contrato comprobado
+La copia local `model.keras` se reconstruyó desde la carpeta descomprimida, con `config.json`, `metadata.json` y `model.weights.h5`. Pesa 43,350,323 bytes y su SHA256 es `4fb1fe0ee4bc5be18b6f4bf715637cde8fe7b7e48289b9fbf771c1c977a892dd`, registrado en `model_contract.json`. Después se encontró el ZIP original y se comprobó que los tres archivos internos son idénticos. Ninguno de los artefactos de pesos se sube a Git.
 
-La documentación original registraba un archivo de 43,350,323 bytes con Keras 3.10.0, entrada `(None,224,224,3)`, capa Dense de 1024 neuronas y salida Dense de 7 con softmax. Su SHA256 histórico (distinto al ZIP reconstruido) era:
+## Contrato del adaptador
+
+El modelo contiene Keras 3.10.0, entrada `(None,224,224,3)`, capa Dense de 1024 neuronas y salida Dense de 7 con softmax. El ZIP original tiene este SHA256, distinto al del ZIP reconstruido porque el empaquetado cambia:
 
 ```text
 967aacb405145fb86fdd14b4a67261749ac1d6d8ab85155f96c71c76d231689a
 ```
 
-El script de entrenamiento que compartiste establece RGB, redimensionado 224×224 y `rescale=1./255`. La interpolación predeterminada de `flow_from_directory` es `nearest`. El handler reproduce esos parámetros, con clases `akiec, bcc, bkl, df, mel, nv, vasc`, en ese orden. Las probabilidades softmax se multiplican por 100 antes de responder a la web.
+El contrato heredado usa RGB, redimensionado 224×224, interpolación `nearest` y normalización `/255`. El handler asigna las salidas a `akiec, bcc, bkl, df, mel, nv, vasc`, en ese orden, y multiplica softmax por 100. El adaptador respeta la lista de entrada con la que se guardó este modelo Functional.
 
-Tu ejemplo final de inferencia usa `mobilenet_v2.preprocess_input`, que aplica una transformación diferente. No lo mezcles con este modelo entrenado con `/255`. Si el archivo «estable» recibió otro entrenamiento que no aparece en el código compartido, comprueba su preprocesamiento antes de usarlo.
+La arquitectura y los pesos no confirman el orden de etiquetas ni la normalización externa del entrenamiento. Ambos deben contrastarse con el notebook o los metadatos del dataset. `mobilenet_v2.preprocess_input` aplica una transformación diferente de `/255`: no son intercambiables.
 
-Además, tu `test_dir` apunta a la carpeta `train`: el 98.96% mostrado es una evaluación sobre entrenamiento, no sobre test independiente. Corrige la ruta a `/test`, usa `shuffle=False` y vuelve a calcular matriz de confusión, sensibilidad por clase y AUC. La validación compartida del checkpoint seleccionado por menor `val_loss` fue aproximadamente 84.09%, no 98.96%. El modelo tampoco incluye una clase «no es piel»: una foto arbitraria válida puede producir una de las siete categorías.
+No se certifican las cifras de precisión de documentación anterior: en esta revisión no se dispone del entrenamiento ni de un test independiente. El modelo no incluye una clase «no es piel»: una imagen arbitraria válida puede producir una de las siete categorías.
 
 ## 1. Preparar Docker
 
@@ -40,12 +42,20 @@ $lambdaSource = (Resolve-Path ./deploy/lambda).Path
 docker run --rm --entrypoint python --mount "type=bind,source=$lambdaSource,target=/tests,readonly" skinscan-cnn:latest -m unittest discover -s /tests -p test_lambda.py
 ```
 
-Prueba del modelo real, en dos terminales:
+Prueba reproducible que carga los pesos reales, valida el contrato y mide primera llamada y llamadas posteriores. Sin `--image` utiliza un PNG sintético, no una lesión:
+
+```powershell
+$lambdaSource = (Resolve-Path ./deploy/lambda).Path
+docker run --rm --network none --cpus 2 --memory 2g --read-only --tmpfs /tmp:rw,size=256m --entrypoint python --mount "type=bind,source=$lambdaSource,target=/tests,readonly" skinscan-cnn:latest /tests/smoke_model.py
+# Opcional: añade --image /tests/imagen-test.jpg si colocaste una imagen autorizada en esa carpeta.
+```
+
+Prueba HTTP mediante el emulador de Lambda, en dos terminales:
 
 ```powershell
 # Terminal 1: usa un secreto aleatorio largo y conserva el mismo valor para la terminal 2.
 $env:SKINSCAN_INFERENCE_API_KEY = 'TU_SECRETO_ALEATORIO'
-docker run --rm -p 9000:8080 -e "INFERENCE_API_KEY=$env:SKINSCAN_INFERENCE_API_KEY" skinscan-cnn:latest
+docker run --rm -p 127.0.0.1:9000:8080 -e "INFERENCE_API_KEY=$env:SKINSCAN_INFERENCE_API_KEY" skinscan-cnn:latest
 ```
 
 ```powershell
@@ -54,7 +64,7 @@ $env:SKINSCAN_INFERENCE_API_KEY = 'EL_MISMO_SECRETO'
 ./deploy/lambda/invoke.ps1 -LocalRuntime -ImagePath 'C:\ruta\imagen-test.jpg'
 ```
 
-Comprueba las mismas imágenes con Keras en tu notebook y con el contenedor, usando `/255`, para verificar coincidencia. Las pruebas no sustituyen la evaluación sobre el conjunto test real. El frontend comprime las fotografías antes de enviarlas: evalúa también con imágenes que hayan pasado por ese flujo.
+Comprueba las mismas imágenes con el notebook original y con el contenedor, usando el preprocesamiento confirmado del entrenamiento. Las pruebas no sustituyen la evaluación sobre el conjunto test real. El frontend comprime las fotografías antes de enviarlas: evalúa también con imágenes que hayan pasado por ese flujo.
 
 ## 3. Subir el contenedor a ECR
 
@@ -103,11 +113,10 @@ Reinicia el servidor Node. No añadas `VITE_` a estas variables. Primero prueba 
 
 Después inicia sesión en SkinScan y crea un análisis para tu cuenta personal. Verifica resultados, historial e informe PDF. No se ha desplegado ninguna función ni realizado llamadas a tu AWS desde esta revisión.
 
-## ¿Para qué sirven los archivos de tu captura?
+## Conversión opcional a TFLite
 
 - `convert_keras_to_tflite.py` convierte los pesos/estructura `.keras` a `.tflite`; no crea una función Lambda ni una URL.
 - `mobilenetv2_model_estable.tflite` es el artefacto convertido y necesita un intérprete compatible para ejecutarse.
-- No recibimos esos dos archivos, solo sus nombres en la captura. Se añadió un conversor opcional propio. No se puede certificar el contenido del conversor original sin leerlo.
 
 El despliegue de arriba utiliza `.keras`. Si prefieres TFLite, primero genera y comprueba el archivo:
 
@@ -120,6 +129,20 @@ El conversor comprueba paridad numérica con un lote sintético y exporta float3
 
 ## Estado de validación local
 
-Se inspeccionaron la estructura y metadatos del `.keras`, pero no se ejecutó TensorFlow ni se convirtió el modelo en esta máquina. Docker Desktop está instalado y su motor está detenido. Los archivos de Docker y las pruebas Python quedan preparados para ejecutarlos al iniciar el motor. Las pruebas Node del backend no ejecutan la CNN.
+Verificación realizada el 7 de noviembre de 2026, con Docker Desktop Linux/amd64, imagen `skinscan-cnn:local`, 2 CPU y límite de 2 GiB de RAM:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Pruebas del adaptador | 5 pasan |
+| Pesos reales, TensorFlow CPU 2.19.0 | Cargan sin descargar pesos adicionales |
+| Primera invocación directa del handler | 5,39 s |
+| Mediana de 5 invocaciones posteriores | 0,22 s |
+| Pico RSS del proceso Python | Aproximadamente 611 MiB |
+| Emulador HTTP de Lambda | Inferencia real 200; token inválido 401; imagen inválida 400 |
+| Primera invocación HTTP / siguiente | 5,47 s / 0,30 s |
+
+El modelo se reutiliza en memoria y las siete probabilidades suman aproximadamente 100. La imagen Docker ocupa 2.647.138.898 bytes en su tamaño local sin comprimir; no es una medición del almacenamiento comprimido facturable de ECR. El contenedor temporal de la prueba HTTP se detuvo al finalizar.
+
+Estas mediciones son locales y usan una imagen sintética. No predicen la latencia en AWS, no confirman la correspondencia de etiquetas y no validan rendimiento clínico. No se ha desplegado el modelo ni se ha convertido a TFLite. Las pruebas Node del backend siguen usando inferencias simuladas.
 
 Referencias: [contenedores Python en Lambda](https://docs.aws.amazon.com/lambda/latest/dg/python-image.html), [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), [autenticación de URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html), [compatibilidad de operadores TFLite](https://developers.google.com/edge/litert/conversion/tensorflow/ops_compatibility).

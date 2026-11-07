@@ -67,7 +67,8 @@ def preprocess_image(payload):
             with Image.open(io.BytesIO(raw)) as image:
                 if image.format != formats[mime]:
                     raise ValueError("El contenido de la imagen no coincide con su MIME.")
-                # Match ImageDataGenerator(target_size=(224,224), color_mode='rgb', rescale=1./255).
+                # Contract assumption: RGB 224x224, nearest resize and /255.
+                # Confirm the external preprocessing against the training notebook.
                 image = image.convert("RGB").resize((224, 224), Image.Resampling.NEAREST)
                 pixels = np.asarray(image, dtype=np.float32) / np.float32(255.0)
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning) as error:
@@ -99,7 +100,11 @@ def handler(event, context):
     except (ValueError, TypeError, UnicodeError, binascii.Error) as error:
         return response(400, {"status": "error", "message": str(error)})
     try:
-        scores = np.asarray(get_model()(pixels, training=False), dtype=np.float64)
+        model = get_model()
+        # The supplied Functional model was saved with a one-element input list.
+        # Preserve that structure while also accepting a single-tensor model.
+        model_input = [pixels] if isinstance(getattr(model, "input", None), list) else pixels
+        scores = np.asarray(model(model_input, training=False), dtype=np.float64)
         if scores.shape != (1, 7) or not np.isfinite(scores).all() or np.any(scores < 0) or np.any(scores > 1) or not np.isclose(scores.sum(), 1.0, atol=0.01):
             raise RuntimeError("Salida softmax inválida.")
         return response(200, {

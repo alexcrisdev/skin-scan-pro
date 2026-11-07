@@ -82,6 +82,6 @@ Se genera un servidor Nitro para Node en `.output/server/index.mjs`. Despliega e
 
 Validación local: TypeScript, las cinco pruebas de contrato/acceso/vista previa y el build de producción pasan. El lint global aún tiene incidencias de formato y usos de `any` en la interfaz existente. La migración SQL, los correos y predicciones requieren validación contra los servicios reales. La instalación también reportó avisos de seguridad en dependencias; revisa `npm audit` antes de producción.
 
-Para mantener el modelo en Lambda, sigue [estos pasos](deploy/lambda/README.md). Se preparó un contenedor Python con TensorFlow CPU y el archivo `.keras`. El motor de Docker está detenido en esta máquina: falta ejecutar el contenedor con imágenes reales y desplegarlo en tu cuenta AWS.
+Para ejecutar el modelo en Lambda, sigue [estos pasos](deploy/lambda/README.md). El contenedor con TensorFlow CPU y los pesos `.keras` ya ejecutó inferencias reales localmente: pasan cinco pruebas Python, el smoke test del modelo y la prueba HTTP del emulador. Se usó una imagen sintética; todavía faltan el notebook para confirmar etiquetas y preprocesamiento, imágenes de test independientes y el despliegue en AWS. Consulta la guía para ver mediciones y límites de esta validación.
 
 # skin-scan-pro

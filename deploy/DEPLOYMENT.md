@@ -24,8 +24,12 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
 
 ## Hallazgos y límites de la revisión
 
-- No se encontraron credenciales configuradas en esta copia. Las migraciones,
-  correos, RLS y Storage necesitan pruebas contra un proyecto real de Supabase.
+- Se enlazó `bd_skin_scan` (`lzmwczcqdmsgwjprvqwb`) con Supabase CLI 3 y se
+  aplicaron las cuatro migraciones el 7 de noviembre de 2026. Se verificaron
+  las cinco tablas con RLS, siete categorías, trigger de perfiles, políticas
+  personales y bucket privado. Las claves locales están en `.env`, excluido de
+  Git. El registro, los correos y el aislamiento entre cuentas todavía requieren
+  pruebas completas desde la aplicación desplegada.
 - El build original forzaba `node-server`. Ahora Vercel selecciona su preset y
   conserva el servidor Node para ejecución local. El wrapper de Lovable impone
   rutas de salida propias; se especifican las de Vercel explícitamente.
@@ -80,6 +84,26 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
 5. Registra dos cuentas nuevas: cada una debe ver únicamente su historial e
    imágenes. Comprueba confirmación de correo y recuperación de contraseña.
 
+La configuración reproducible está en `supabase/config.toml`. Incluye URLs
+locales y el dominio de producción en `[remotes.production]`. La CLI conserva
+las credenciales y el enlace en almacenamiento local excluido de Git. No uses
+el mismo proyecto como base de staging si necesitas aislar datos de producción.
+
+Para instalaciones con Supabase CLI 3, utiliza un destino remoto explícito:
+
+```powershell
+npx.cmd supabase login
+npx.cmd supabase link --project-ref lzmwczcqdmsgwjprvqwb
+npx.cmd supabase migration list --remote=lzmwczcqdmsgwjprvqwb
+npx.cmd supabase db push --remote=lzmwczcqdmsgwjprvqwb --skip-vault --dry-run
+# Solo después de revisar las migraciones pendientes:
+npx.cmd supabase db push --remote=lzmwczcqdmsgwjprvqwb --skip-vault
+```
+
+`supabase config diff --remote=lzmwczcqdmsgwjprvqwb` permite revisar las URLs
+antes de `config push`. No ejecutes `db reset` contra producción. En CLI 3, los
+comandos de base de datos sin `--remote` apuntan a la base local.
+
 ## 2. Ejecutar y desplegar la CNN
 
 Sigue [la guía de Lambda](lambda/README.md). El modelo local no se sube mediante
@@ -106,9 +130,8 @@ timeout y consumo requieren medición real; no se promete coste cero.
    **TanStack Start**, Node.js **24.x**, instalación `npm ci` y build
    `npm run build`. Deja el directorio de salida con la configuración del
    framework: Nitro genera `.vercel/output`; no es una web estática.
-2. Selecciona explícitamente la rama de pruebas
-   `alex/despliegue-vercel-supabase`. El remoto tiene por defecto la rama de
-   Leandro: revisa **Production Branch** antes de activar despliegues automáticos.
+2. Configura **Production Branch** como `main`. Usa `develop` para los
+   despliegues Preview de pruebas. Ambas ramas ya están creadas en GitHub.
 3. Añade las variables de la tabla. Usa un Supabase de pruebas para Preview
    cuando necesites aislar los datos de producción.
 

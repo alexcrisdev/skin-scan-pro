@@ -1,6 +1,6 @@
 # SkinScan
 
-Aplicación React 19 y TanStack Start para clasificar imágenes de lesiones cutáneas mediante una CNN externa. Usa Supabase Auth, PostgreSQL y Storage privado. Todas las cuentas tienen acceso al panel, pacientes, historial e informes PDF, sin planes ni cobros.
+Aplicación React 19 y TanStack Start para clasificar imágenes de lesiones cutáneas mediante una CNN externa. Usa Supabase Auth, PostgreSQL y Storage privado. Cada cuenta es personal, con acceso a sus propios análisis, historial e informes PDF, sin planes ni cobros.
 
 La clasificación sirve de apoyo a una evaluación profesional; el porcentaje del modelo no constituye un diagnóstico.
 
@@ -10,13 +10,15 @@ Al abrir `/` se muestra directamente `/app`. Sin sesión, el panel funciona como
 
 1. Instala Node.js 22.12+ y ejecuta `npm install`.
 2. Copia `.env.example` a `.env` y configura las claves de Supabase.
-3. Revisa y ejecuta las migraciones de `supabase/migrations` en orden. Si ya aplicaste la primera, ejecuta solamente `202611060002_remove_billing.sql`. Incluyen las tablas, el trigger de perfiles, políticas RLS y Storage privado.
+3. Revisa y ejecuta las migraciones pendientes de `supabase/migrations` en orden, sin repetir las ya aplicadas. Incluyen las tablas, el trigger de perfiles, políticas RLS y Storage privado. La última, `202611070002_personal_accounts.sql`, retira el acceso a pacientes y limita las lecturas al historial personal.
 4. En Supabase Auth habilita email/contraseña, configura Site URL y autoriza `http://localhost:5173/restablecer` para la recuperación. Ajusta el puerto al que muestre Vite y agrega el dominio real al desplegar.
 5. Configura `SKINSCAN_INFERENCE_URL` para habilitar los análisis y ejecuta `npm run dev`.
 
 `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` son públicas y se configuran antes del build. `SUPABASE_SERVICE_ROLE_KEY` y la credencial de inferencia pertenecen exclusivamente al servidor y se leen en tiempo de ejecución. No las prefijes con `VITE_`.
 
 El registro crea el perfil mediante un trigger. Con confirmación por correo habilitada, se pide confirmar antes del login. La recuperación redirige a `/restablecer` para definir la nueva contraseña.
+
+El registro solicita nombre, correo y contraseña, sin rol ni perfil médico. Los análisis nuevos quedan asociados a la identidad autenticada, sin seleccionar otra persona. Se retiraron Gestión de personas, sus APIs y los filtros de pacientes del historial. Los registros antiguos asociados a pacientes se conservan para revisión administrativa y no se reasignan a la cuenta ni aparecen como análisis propios.
 
 ## Migración de datos existentes
 
@@ -77,4 +79,5 @@ Se genera un servidor Nitro para Node en `.output/server/index.mjs`. Despliega e
 Validación local: TypeScript, las cinco pruebas de contrato/acceso/vista previa y el build de producción pasan. El lint global aún tiene incidencias de formato y usos de `any` en la interfaz existente. La migración SQL, los correos y predicciones requieren validación contra los servicios reales. La instalación también reportó avisos de seguridad en dependencias; revisa `npm audit` antes de producción.
 
 Para mantener el modelo en Lambda, sigue [estos pasos](deploy/lambda/README.md). Se preparó un contenedor Python con TensorFlow CPU y el archivo `.keras`. El motor de Docker está detenido en esta máquina: falta ejecutar el contenedor con imágenes reales y desplegarlo en tu cuenta AWS.
+
 # skin-scan-pro

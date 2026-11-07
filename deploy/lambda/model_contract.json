@@ -1,6 +1,7 @@
 {
   "source_file": "mobilenetv2_model_estable.keras",
   "source_sha256": "967aacb405145fb86fdd14b4a67261749ac1d6d8ab85155f96c71c76d231689a",
+  "reconstructed_archive_sha256": "4fb1fe0ee4bc5be18b6f4bf715637cde8fe7b7e48289b9fbf771c1c977a892dd",
   "keras_version": "3.10.0",
   "input_shape": [1, 224, 224, 3],
   "color_mode": "RGB",

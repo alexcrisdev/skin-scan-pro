@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_ANALYSIS_BASE64_LENGTH } from "../../lib/analysis-limits";
 
 export const ALLOWED_IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -20,11 +21,11 @@ export const lesionNameDescriptions: Record<string, string> = {
 export const createAnalysisRequestSchema = z
   .object({
     mime: z.enum(ALLOWED_IMAGE_MIME_TYPES),
-    image_url: z.string().url("La URL publica de la imagen no es valida."),
+    image_url: z.string().url("La URL privada de la imagen no es valida.").max(8192),
     image: z
       .string()
       .min(1, "La imagen es obligatoria.")
-      .max(5592408, "La imagen comprimida excede 4 MiB.")
+      .max(MAX_ANALYSIS_BASE64_LENGTH, "La imagen comprimida excede 3 MiB.")
       .refine(
         (value) => !value.startsWith("data:"),
         "La imagen debe enviarse en Base64 sin Data URI.",

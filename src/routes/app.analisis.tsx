@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getIdToken } from "@/lib/auth";
+import { MAX_ANALYSIS_IMAGE_BYTES } from "@/lib/analysis-limits";
 import {
   Camera,
   Calendar,
@@ -44,7 +45,6 @@ type Phase = "idle" | "preview" | "analyzing" | "done";
 
 const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_ORIGINAL_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-const AWS_LAMBDA_PAYLOAD_LIMIT_BYTES = 6 * 1024 * 1024;
 const COMPRESSED_IMAGE_MIME = "image/jpeg";
 const COMPRESSED_IMAGE_QUALITY = 0.8;
 const COMPRESSED_IMAGE_MAX_WIDTH = 800;
@@ -59,10 +59,6 @@ function fileToBase64(file: File) {
     };
     reader.readAsDataURL(file);
   });
-}
-
-function getUtf8ByteLength(value: string) {
-  return new TextEncoder().encode(value).length;
 }
 
 function loadImage(file: File) {
@@ -132,23 +128,10 @@ async function procesarYEnviarImagen(file: File) {
   }
 
   const compressedFile = await compressImage(file);
-  if (compressedFile.size > 4 * 1024 * 1024) {
-    throw new Error("La imagen comprimida excede 4 MiB. Utiliza una imagen de menor tamaño.");
+  if (compressedFile.size > MAX_ANALYSIS_IMAGE_BYTES) {
+    throw new Error("La imagen comprimida excede 3 MiB. Utiliza una imagen de menor tamaño.");
   }
   const base64 = await fileToBase64(compressedFile);
-  const awsPayloadSize = getUtf8ByteLength(
-    JSON.stringify({
-      mime: compressedFile.type,
-      image: base64,
-    }),
-  );
-
-  if (awsPayloadSize > AWS_LAMBDA_PAYLOAD_LIMIT_BYTES) {
-    throw new Error(
-      "La imagen comprimida todavia supera el limite de 6 MB permitido por AWS Lambda.",
-    );
-  }
-
   return {
     base64,
     optimizedFile: compressedFile,

@@ -1,10 +1,12 @@
 # CNN MobileNetV2 en AWS Lambda
 
-Este paquete ejecuta directamente `model.keras` en CPU mediante un contenedor de Lambda. No necesitas convertir a `.tflite` para esta opción. El archivo local ya fue copiado desde el modelo que proporcionaste y está excluido de Git.
+Este paquete ejecuta directamente `model.keras` en CPU mediante un contenedor de Lambda. No necesitas convertir a `.tflite` para esta opción. Los pesos están excluidos de Git y deben prepararse en cada copia del repositorio.
+
+Revisión del 7 de noviembre de 2026: la ruta proporcionada era una carpeta Keras descomprimida. Se reconstruyó localmente `model.keras` con sus tres archivos (`config.json`, `metadata.json`, `model.weights.h5`). El ZIP reconstruido pesa 43,350,323 bytes y su SHA256 es `4fb1fe0ee4bc5be18b6f4bf715637cde8fe7b7e48289b9fbf771c1c977a892dd`, registrado en `model_contract.json` como `reconstructed_archive_sha256`. La estructura coincide con la entrada RGB 224×224 y salida de siete clases; no se ejecutó TensorFlow. El código de entrenamiento no está en este checkout. Las observaciones de entrenamiento y métricas que siguen son antecedentes de la documentación heredada y requieren comprobarse con el notebook original.
 
 ## Contrato comprobado
 
-El archivo proporcionado pesa 43,350,323 bytes y contiene Keras 3.10.0, entrada `(None,224,224,3)`, capa Dense de 1024 neuronas y salida Dense de 7 con softmax. SHA256:
+La documentación original registraba un archivo de 43,350,323 bytes con Keras 3.10.0, entrada `(None,224,224,3)`, capa Dense de 1024 neuronas y salida Dense de 7 con softmax. Su SHA256 histórico (distinto al ZIP reconstruido) era:
 
 ```text
 967aacb405145fb86fdd14b4a67261749ac1d6d8ab85155f96c71c76d231689a
@@ -99,7 +101,7 @@ Reinicia el servidor Node. No añadas `VITE_` a estas variables. Primero prueba 
 ./deploy/lambda/invoke.ps1 -Endpoint 'https://TU_ID.lambda-url.TU_REGION.on.aws/' -ImagePath 'C:\ruta\imagen-test.jpg'
 ```
 
-Después inicia sesión en SkinScan, registra una persona y crea un análisis. Verifica resultados, historial e informe PDF. No se ha desplegado ninguna función ni realizado llamadas a tu AWS desde este proyecto.
+Después inicia sesión en SkinScan y crea un análisis para tu cuenta personal. Verifica resultados, historial e informe PDF. No se ha desplegado ninguna función ni realizado llamadas a tu AWS desde esta revisión.
 
 ## ¿Para qué sirven los archivos de tu captura?
 

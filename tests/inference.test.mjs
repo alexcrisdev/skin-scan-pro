@@ -134,6 +134,27 @@ test("analysis reads enforce ownership and scope history to the caller", async (
 });
 const input = { mime: "image/jpeg", image: "aW1hZ2U=", image_url: "https://example.com/image.jpg" };
 
+test("image request stays below the Vercel payload limit including the signed URL", () => {
+  const request = {
+    mime: "image/jpeg",
+    image: "A".repeat(4 * 1024 * 1024),
+    image_url: `https://example.com/${"a".repeat(8100)}`,
+  };
+  assert.equal(createAnalysisRequestSchema.safeParse(request).success, true);
+  assert.ok(Buffer.byteLength(JSON.stringify(request)) < 4_500_000);
+  assert.equal(
+    createAnalysisRequestSchema.safeParse({ ...request, image: `${request.image}AAAA` }).success,
+    false,
+  );
+  assert.equal(
+    createAnalysisRequestSchema.safeParse({
+      ...request,
+      image_url: `https://example.com/${"a".repeat(8192)}`,
+    }).success,
+    false,
+  );
+});
+
 test("CNN HTTP adapter validates configuration, credentials, response and failures", async (t) => {
   const originalFetch = globalThis.fetch;
   const keys = [

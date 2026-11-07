@@ -1,5 +1,9 @@
 # SkinScan
 
+Para la revisión actual del repositorio y los pasos de Vercel + Supabase + CNN,
+consulta [la guía de despliegue](deploy/DEPLOYMENT.md). Distingue la preparación
+local de los servicios y predicciones que aún requieren validación real.
+
 Aplicación React 19 y TanStack Start para clasificar imágenes de lesiones cutáneas mediante una CNN externa. Usa Supabase Auth, PostgreSQL y Storage privado. Cada cuenta es personal, con acceso a sus propios análisis, historial e informes PDF, sin planes ni cobros.
 
 La clasificación sirve de apoyo a una evaluación profesional; el porcentaje del modelo no constituye un diagnóstico.

@@ -9,56 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RestablecerRouteImport } from './routes/restablecer'
-import { Route as RegistroRouteImport } from './routes/registro'
-import { Route as RecuperarRouteImport } from './routes/recuperar'
-import { Route as PresentacionRouteImport } from './routes/presentacion'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppPerfilRouteImport } from './routes/app.perfil'
-import { Route as AppHistorialRouteImport } from './routes/app.historial'
-import { Route as AppConfiguracionRouteImport } from './routes/app.configuracion'
-import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
-import { Route as AppAnalisisRouteImport } from './routes/app.analisis'
-import { Route as ApiChatbotRouteImport } from './routes/api/chatbot'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PresentacionRouteImport } from './routes/presentacion'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
+import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as RestablecerRouteImport } from './routes/restablecer'
 import { Route as ApiAnalysesRouteImport } from './routes/api/analyses'
-import { Route as ApiAnalysesHistoryRouteImport } from './routes/api/analyses/history'
+import { Route as ApiChatbotRouteImport } from './routes/api/chatbot'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAnalisisRouteImport } from './routes/app.analisis'
+import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
+import { Route as AppConfiguracionRouteImport } from './routes/app.configuracion'
+import { Route as AppHistorialRouteImport } from './routes/app.historial'
+import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as ApiAnalysesAnalysisIdRouteImport } from './routes/api/analyses/$analysisId'
-import { Route as ApiClientsClientIdAnalysesRouteImport } from './routes/api/clients/$clientId/analyses'
-import { Route as ApiAnalysesAnalysisIdImageRouteImport } from './routes/api/analyses/$analysisId/image'
+import { Route as ApiAnalysesHistoryRouteImport } from './routes/api/analyses/history'
 import { Route as ApiAnalysesAnalysisIdDetailRouteImport } from './routes/api/analyses/$analysisId/detail'
+import { Route as ApiAnalysesAnalysisIdImageRouteImport } from './routes/api/analyses/$analysisId/image'
+import { Route as ApiClientsClientIdAnalysesRouteImport } from './routes/api/clients/$clientId/analyses'
 
-const RestablecerRoute = RestablecerRouteImport.update({
-  id: '/restablecer',
-  path: '/restablecer',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegistroRoute = RegistroRouteImport.update({
-  id: '/registro',
-  path: '/registro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecuperarRoute = RecuperarRouteImport.update({
-  id: '/recuperar',
-  path: '/recuperar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PresentacionRoute = PresentacionRouteImport.update({
-  id: '/presentacion',
-  path: '/presentacion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -66,44 +41,34 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppPerfilRoute = AppPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => AppRoute,
+const PresentacionRoute = PresentacionRouteImport.update({
+  id: '/presentacion',
+  path: '/presentacion',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppHistorialRoute = AppHistorialRouteImport.update({
-  id: '/historial',
-  path: '/historial',
-  getParentRoute: () => AppRoute,
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppConfiguracionRoute = AppConfiguracionRouteImport.update({
-  id: '/configuracion',
-  path: '/configuracion',
-  getParentRoute: () => AppRoute,
+const RegistroRoute = RegistroRouteImport.update({
+  id: '/registro',
+  path: '/registro',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppChatbotRoute = AppChatbotRouteImport.update({
-  id: '/chatbot',
-  path: '/chatbot',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAnalisisRoute = AppAnalisisRouteImport.update({
-  id: '/analisis',
-  path: '/analisis',
-  getParentRoute: () => AppRoute,
-} as any)
-const ApiChatbotRoute = ApiChatbotRouteImport.update({
-  id: '/api/chatbot',
-  path: '/api/chatbot',
+const RestablecerRoute = RestablecerRouteImport.update({
+  id: '/restablecer',
+  path: '/restablecer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAnalysesRoute = ApiAnalysesRouteImport.update({
@@ -111,21 +76,56 @@ const ApiAnalysesRoute = ApiAnalysesRouteImport.update({
   path: '/api/analyses',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAnalysesHistoryRoute = ApiAnalysesHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => ApiAnalysesRoute,
+const ApiChatbotRoute = ApiChatbotRouteImport.update({
+  id: '/api/chatbot',
+  path: '/api/chatbot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalisisRoute = AppAnalisisRouteImport.update({
+  id: '/analisis',
+  path: '/analisis',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatbotRoute = AppChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracionRoute = AppConfiguracionRouteImport.update({
+  id: '/configuracion',
+  path: '/configuracion',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistorialRoute = AppHistorialRouteImport.update({
+  id: '/historial',
+  path: '/historial',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiAnalysesAnalysisIdRoute = ApiAnalysesAnalysisIdRouteImport.update({
   id: '/$analysisId',
   path: '/$analysisId',
   getParentRoute: () => ApiAnalysesRoute,
 } as any)
-const ApiClientsClientIdAnalysesRoute =
-  ApiClientsClientIdAnalysesRouteImport.update({
-    id: '/api/clients/$clientId/analyses',
-    path: '/api/clients/$clientId/analyses',
-    getParentRoute: () => rootRouteImport,
+const ApiAnalysesHistoryRoute = ApiAnalysesHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => ApiAnalysesRoute,
+} as any)
+const ApiAnalysesAnalysisIdDetailRoute =
+  ApiAnalysesAnalysisIdDetailRouteImport.update({
+    id: '/detail',
+    path: '/detail',
+    getParentRoute: () => ApiAnalysesAnalysisIdRoute,
   } as any)
 const ApiAnalysesAnalysisIdImageRoute =
   ApiAnalysesAnalysisIdImageRouteImport.update({
@@ -133,11 +133,11 @@ const ApiAnalysesAnalysisIdImageRoute =
     path: '/image',
     getParentRoute: () => ApiAnalysesAnalysisIdRoute,
   } as any)
-const ApiAnalysesAnalysisIdDetailRoute =
-  ApiAnalysesAnalysisIdDetailRouteImport.update({
-    id: '/detail',
-    path: '/detail',
-    getParentRoute: () => ApiAnalysesAnalysisIdRoute,
+const ApiClientsClientIdAnalysesRoute =
+  ApiClientsClientIdAnalysesRouteImport.update({
+    id: '/api/clients/$clientId/analyses',
+    path: '/api/clients/$clientId/analyses',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -296,46 +296,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/restablecer': {
-      id: '/restablecer'
-      path: '/restablecer'
-      fullPath: '/restablecer'
-      preLoaderRoute: typeof RestablecerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/registro': {
-      id: '/registro'
-      path: '/registro'
-      fullPath: '/registro'
-      preLoaderRoute: typeof RegistroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recuperar': {
-      id: '/recuperar'
-      path: '/recuperar'
-      fullPath: '/recuperar'
-      preLoaderRoute: typeof RecuperarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentacion': {
-      id: '/presentacion'
-      path: '/presentacion'
-      fullPath: '/presentacion'
-      preLoaderRoute: typeof PresentacionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -345,60 +310,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/perfil': {
-      id: '/app/perfil'
-      path: '/perfil'
-      fullPath: '/app/perfil'
-      preLoaderRoute: typeof AppPerfilRouteImport
-      parentRoute: typeof AppRoute
+    '/presentacion': {
+      id: '/presentacion'
+      path: '/presentacion'
+      fullPath: '/presentacion'
+      preLoaderRoute: typeof PresentacionRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/historial': {
-      id: '/app/historial'
-      path: '/historial'
-      fullPath: '/app/historial'
-      preLoaderRoute: typeof AppHistorialRouteImport
-      parentRoute: typeof AppRoute
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/configuracion': {
-      id: '/app/configuracion'
-      path: '/configuracion'
-      fullPath: '/app/configuracion'
-      preLoaderRoute: typeof AppConfiguracionRouteImport
-      parentRoute: typeof AppRoute
+    '/registro': {
+      id: '/registro'
+      path: '/registro'
+      fullPath: '/registro'
+      preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/chatbot': {
-      id: '/app/chatbot'
-      path: '/chatbot'
-      fullPath: '/app/chatbot'
-      preLoaderRoute: typeof AppChatbotRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/analisis': {
-      id: '/app/analisis'
-      path: '/analisis'
-      fullPath: '/app/analisis'
-      preLoaderRoute: typeof AppAnalisisRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/api/chatbot': {
-      id: '/api/chatbot'
-      path: '/api/chatbot'
-      fullPath: '/api/chatbot'
-      preLoaderRoute: typeof ApiChatbotRouteImport
+    '/restablecer': {
+      id: '/restablecer'
+      path: '/restablecer'
+      fullPath: '/restablecer'
+      preLoaderRoute: typeof RestablecerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/analyses': {
@@ -408,12 +359,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalysesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/analyses/history': {
-      id: '/api/analyses/history'
-      path: '/history'
-      fullPath: '/api/analyses/history'
-      preLoaderRoute: typeof ApiAnalysesHistoryRouteImport
-      parentRoute: typeof ApiAnalysesRoute
+    '/api/chatbot': {
+      id: '/api/chatbot'
+      path: '/api/chatbot'
+      fullPath: '/api/chatbot'
+      preLoaderRoute: typeof ApiChatbotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/analisis': {
+      id: '/app/analisis'
+      path: '/analisis'
+      fullPath: '/app/analisis'
+      preLoaderRoute: typeof AppAnalisisRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chatbot': {
+      id: '/app/chatbot'
+      path: '/chatbot'
+      fullPath: '/app/chatbot'
+      preLoaderRoute: typeof AppChatbotRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/configuracion': {
+      id: '/app/configuracion'
+      path: '/configuracion'
+      fullPath: '/app/configuracion'
+      preLoaderRoute: typeof AppConfiguracionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/historial': {
+      id: '/app/historial'
+      path: '/historial'
+      fullPath: '/app/historial'
+      preLoaderRoute: typeof AppHistorialRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/perfil': {
+      id: '/app/perfil'
+      path: '/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/analyses/$analysisId': {
       id: '/api/analyses/$analysisId'
@@ -422,12 +415,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalysesAnalysisIdRouteImport
       parentRoute: typeof ApiAnalysesRoute
     }
-    '/api/clients/$clientId/analyses': {
-      id: '/api/clients/$clientId/analyses'
-      path: '/api/clients/$clientId/analyses'
-      fullPath: '/api/clients/$clientId/analyses'
-      preLoaderRoute: typeof ApiClientsClientIdAnalysesRouteImport
-      parentRoute: typeof rootRouteImport
+    '/api/analyses/history': {
+      id: '/api/analyses/history'
+      path: '/history'
+      fullPath: '/api/analyses/history'
+      preLoaderRoute: typeof ApiAnalysesHistoryRouteImport
+      parentRoute: typeof ApiAnalysesRoute
+    }
+    '/api/analyses/$analysisId/detail': {
+      id: '/api/analyses/$analysisId/detail'
+      path: '/detail'
+      fullPath: '/api/analyses/$analysisId/detail'
+      preLoaderRoute: typeof ApiAnalysesAnalysisIdDetailRouteImport
+      parentRoute: typeof ApiAnalysesAnalysisIdRoute
     }
     '/api/analyses/$analysisId/image': {
       id: '/api/analyses/$analysisId/image'
@@ -436,12 +436,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalysesAnalysisIdImageRouteImport
       parentRoute: typeof ApiAnalysesAnalysisIdRoute
     }
-    '/api/analyses/$analysisId/detail': {
-      id: '/api/analyses/$analysisId/detail'
-      path: '/detail'
-      fullPath: '/api/analyses/$analysisId/detail'
-      preLoaderRoute: typeof ApiAnalysesAnalysisIdDetailRouteImport
-      parentRoute: typeof ApiAnalysesAnalysisIdRoute
+    '/api/clients/$clientId/analyses': {
+      id: '/api/clients/$clientId/analyses'
+      path: '/api/clients/$clientId/analyses'
+      fullPath: '/api/clients/$clientId/analyses'
+      preLoaderRoute: typeof ApiClientsClientIdAnalysesRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

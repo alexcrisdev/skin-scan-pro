@@ -43,10 +43,12 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
   Sus metadatos indican Keras 3.10.0, entrada `(None,224,224,3)`, Dense de 1024
   y salida Dense de siete unidades softmax. Esto no confirma el orden de clases
   ni la normalización del entrenamiento.
-- El contrato existente supone RGB, interpolación nearest, `/255` y orden
-  `akiec,bcc,bkl,df,mel,nv,vasc`. Confirmar con el entrenamiento antes de publicar
-  resultados. No usar cifras de precisión heredadas como validación: en esta
-  revisión no se dispone del notebook ni del conjunto de test independiente.
+- Los notebooks suministrados respaldan RGB 224×224, interpolación nearest,
+  `/255` y orden `akiec,bcc,bkl,df,mel,nv,vasc`. Se documentaron sus hashes y
+  evidencias en [la revisión del entrenamiento](lambda/TRAINING_REVIEW.md).
+  El supuesto test apunta a `/train` y la inferencia de ejemplo usa otra
+  normalización. No usar el 98,96 % mostrado como precisión independiente;
+  falta obtener el dataset original y evaluar el `.keras` recibido sobre `/test`.
 - El modelo de siete clases no incorpora rechazo de imágenes ajenas a piel.
   Una imagen válida de otro objeto puede recibir una categoría dermatológica.
 - La API recibe la imagen y su URL por separado; comprueba el propietario de la
@@ -62,11 +64,11 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
 - El chatbot está retirado (HTTP 410). El historial guarda análisis; no hay una
   entidad que vincule fotografías sucesivas de la misma lesión para compararlas.
 - Se construyó y ejecutó la CNN real en Docker Desktop Linux/amd64 con 2 CPU
-  y límite de 2 GiB: cinco pruebas del adaptador pasan, al igual que el smoke
-  test de pesos y la prueba HTTP en el emulador de Lambda. Primera llamada
+  y límite de 2 GiB: seis pruebas del adaptador y contrato con Keras pasan,
+  al igual que el smoke test de pesos y la prueba HTTP en el emulador de Lambda. Primera llamada
   del handler: 5,39 s; mediana posterior: 0,22 s; pico RSS: unos 611 MiB.
-  Se usó una imagen sintética: las etiquetas, la normalización del entrenamiento
-  y la precisión con lesiones reales siguen sin confirmarse. No se desplegó AWS.
+  Se usó una imagen sintética: la precisión con lesiones reales sigue sin
+  evaluarse. Los notebooks respaldan etiquetas y normalización. No se desplegó AWS.
 
 ## 1. Configurar Supabase
 
@@ -116,7 +118,8 @@ No hay que volver a entrenarlo para servirlo.
 
 Antes de crear recursos:
 
-1. Confirma clases y preprocesamiento con el entrenamiento real.
+1. Revisa las evidencias de clases y preprocesamiento en `lambda/TRAINING_REVIEW.md`
+   y obtén el dataset original para la evaluación independiente pendiente.
 2. Inicia Docker Desktop con contenedores Linux.
 3. Construye el contenedor, ejecuta las pruebas Python y compara predicciones
    de imágenes de test con el notebook, usando el mismo preprocesamiento.

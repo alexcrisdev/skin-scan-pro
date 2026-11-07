@@ -2,7 +2,7 @@
 
 Este paquete ejecuta directamente `model.keras` en CPU mediante un contenedor de Lambda. No necesitas convertir a `.tflite` para esta opción. Los pesos están excluidos de Git y deben prepararse en cada copia del repositorio.
 
-Revisión del 7 de noviembre de 2026: se construyó la imagen y se ejecutaron los pesos reales en Docker Desktop con TensorFlow CPU 2.19 y Keras 3.10. Las pruebas de ejecución usan una imagen sintética y no evalúan precisión dermatológica. El notebook de entrenamiento y el conjunto de test no están disponibles.
+Revisión del 7 de noviembre de 2026: se construyó la imagen y se ejecutaron los pesos reales en Docker Desktop con TensorFlow CPU 2.19 y Keras 3.10. Después se recibieron y revisaron los notebooks de entrenamiento y separación. Respaldan el contrato de entrada y etiquetas; el dataset de test sigue sin estar disponible. Las pruebas sintéticas no evalúan precisión dermatológica. Consulta la [revisión del entrenamiento](TRAINING_REVIEW.md).
 
 La copia local `model.keras` se reconstruyó desde la carpeta descomprimida, con `config.json`, `metadata.json` y `model.weights.h5`. Pesa 43,350,323 bytes y su SHA256 es `4fb1fe0ee4bc5be18b6f4bf715637cde8fe7b7e48289b9fbf771c1c977a892dd`, registrado en `model_contract.json`. Después se encontró el ZIP original y se comprobó que los tres archivos internos son idénticos. Ninguno de los artefactos de pesos se sube a Git.
 
@@ -14,11 +14,11 @@ El modelo contiene Keras 3.10.0, entrada `(None,224,224,3)`, capa Dense de 1024 
 967aacb405145fb86fdd14b4a67261749ac1d6d8ab85155f96c71c76d231689a
 ```
 
-El contrato heredado usa RGB, redimensionado 224×224, interpolación `nearest` y normalización `/255`. El handler asigna las salidas a `akiec, bcc, bkl, df, mel, nv, vasc`, en ese orden, y multiplica softmax por 100. El adaptador respeta la lista de entrada con la que se guardó este modelo Functional.
+El entrenamiento suministrado usa RGB, redimensionado 224×224, interpolación predeterminada `nearest` y normalización `/255`. El handler asigna las salidas a `akiec, bcc, bkl, df, mel, nv, vasc`, en ese orden, y multiplica softmax por 100. Ese orden coincide con las carpetas inferidas por Keras y la lista explícita del notebook. El adaptador respeta la lista de entrada con la que se guardó este modelo Functional.
 
-La arquitectura y los pesos no confirman el orden de etiquetas ni la normalización externa del entrenamiento. Ambos deben contrastarse con el notebook o los metadatos del dataset. `mobilenet_v2.preprocess_input` aplica una transformación diferente de `/255`: no son intercambiables.
+La última celda de inferencia del notebook aplica `mobilenet_v2.preprocess_input`, a diferencia de sus generadores de entrenamiento. Se mantiene `/255` por coherencia con el entrenamiento. `test_training_contract.py` verifica los índices de clase y la equivalencia numérica con las APIs de carga y escalado de Keras.
 
-No se certifican las cifras de precisión de documentación anterior: en esta revisión no se dispone del entrenamiento ni de un test independiente. El modelo no incluye una clase «no es piel»: una imagen arbitraria válida puede producir una de las siete categorías.
+El notebook asigna `test_dir` a `/train`, por lo que el 98,96 % mostrado no mide rendimiento independiente. Debe corregirse a `/test` y reevaluar el archivo recibido. Su arquitectura coincide con el notebook; el nombre del checkpoint guardado difiere del artefacto renombrado y no hay un manifiesto que vincule ambos por hash. El modelo no incluye una clase «no es piel»: una imagen arbitraria válida puede producir una de las siete categorías.
 
 ## 1. Preparar Docker
 
@@ -35,11 +35,12 @@ El Dockerfile usa Python 3.12, TensorFlow CPU 2.19 y Keras 3.10. El modelo se ca
 
 ## 2. Probar antes de subir
 
-Pruebas del preprocesamiento, autenticación y contrato (utilizan predicción simulada):
+Pruebas del preprocesamiento, autenticación y contrato. Incluyen la comparación
+con Keras y respuestas simuladas del modelo para los casos del adaptador:
 
 ```powershell
 $lambdaSource = (Resolve-Path ./deploy/lambda).Path
-docker run --rm --entrypoint python --mount "type=bind,source=$lambdaSource,target=/tests,readonly" skinscan-cnn:latest -m unittest discover -s /tests -p test_lambda.py
+docker run --rm --entrypoint python --mount "type=bind,source=$lambdaSource,target=/tests,readonly" skinscan-cnn:latest -m unittest discover -s /tests -p 'test_*.py'
 ```
 
 Prueba reproducible que carga los pesos reales, valida el contrato y mide primera llamada y llamadas posteriores. Sin `--image` utiliza un PNG sintético, no una lesión:
@@ -133,7 +134,7 @@ Verificación realizada el 7 de noviembre de 2026, con Docker Desktop Linux/amd6
 
 | Comprobación | Resultado |
 | --- | --- |
-| Pruebas del adaptador | 5 pasan |
+| Pruebas del adaptador y contrato con Keras | 6 pasan |
 | Pesos reales, TensorFlow CPU 2.19.0 | Cargan sin descargar pesos adicionales |
 | Primera invocación directa del handler | 5,39 s |
 | Mediana de 5 invocaciones posteriores | 0,22 s |
@@ -143,6 +144,6 @@ Verificación realizada el 7 de noviembre de 2026, con Docker Desktop Linux/amd6
 
 El modelo se reutiliza en memoria y las siete probabilidades suman aproximadamente 100. La imagen Docker ocupa 2.647.138.898 bytes en su tamaño local sin comprimir; no es una medición del almacenamiento comprimido facturable de ECR. El contenedor temporal de la prueba HTTP se detuvo al finalizar.
 
-Estas mediciones son locales y usan una imagen sintética. No predicen la latencia en AWS, no confirman la correspondencia de etiquetas y no validan rendimiento clínico. No se ha desplegado el modelo ni se ha convertido a TFLite. Las pruebas Node del backend siguen usando inferencias simuladas.
+Estas mediciones son locales y usan una imagen sintética. No predicen la latencia en AWS ni validan rendimiento clínico. La revisión posterior del entrenamiento respalda etiquetas y preprocesamiento, con las limitaciones descritas arriba. No se ha desplegado el modelo ni se ha convertido a TFLite desde este proyecto. Las pruebas Node del backend siguen usando inferencias simuladas.
 
 Referencias: [contenedores Python en Lambda](https://docs.aws.amazon.com/lambda/latest/dg/python-image.html), [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), [autenticación de URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html), [compatibilidad de operadores TFLite](https://developers.google.com/edge/litert/conversion/tensorflow/ops_compatibility).

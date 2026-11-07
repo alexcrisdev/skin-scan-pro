@@ -9,5 +9,14 @@
   "normalization": "divide_by_255",
   "class_names": ["akiec", "bcc", "bkl", "df", "mel", "nv", "vasc"],
   "output_activation": "softmax",
-  "output_units": 7
+  "output_units": 7,
+  "training_evidence": {
+    "status": "supported_by_supplied_training_notebook",
+    "notebook": "cnn-skin-cancer.ipynb",
+    "notebook_sha256": "166dcec86c18425dc96afcaca40e1c6fad4d9324f0ffa6af3124461d1498aea2",
+    "split_notebook": "split-cnn-skin-cancer.ipynb",
+    "split_notebook_sha256": "800799bb0ba29f499cc0964279091373bcf18cf871b220b382fac0a32b6bfede",
+    "class_indices": {"akiec": 0, "bcc": 1, "bkl": 2, "df": 3, "mel": 4, "nv": 5, "vasc": 6},
+    "evaluation_status": "independent_test_required_original_test_dir_points_to_train"
+  }
 }

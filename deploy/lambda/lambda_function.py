@@ -67,8 +67,8 @@ def preprocess_image(payload):
             with Image.open(io.BytesIO(raw)) as image:
                 if image.format != formats[mime]:
                     raise ValueError("El contenido de la imagen no coincide con su MIME.")
-                # Contract assumption: RGB 224x224, nearest resize and /255.
-                # Confirm the external preprocessing against the training notebook.
+                # Matches the reviewed cnn-skin-cancer.ipynb training generators:
+                # RGB 224x224, default nearest resize and rescale=1./255.
                 image = image.convert("RGB").resize((224, 224), Image.Resampling.NEAREST)
                 pixels = np.asarray(image, dtype=np.float32) / np.float32(255.0)
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning) as error:

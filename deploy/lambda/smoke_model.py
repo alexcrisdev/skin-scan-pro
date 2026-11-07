@@ -79,7 +79,7 @@ def main():
         "input_shape": list(model.input_shape),
         "output_shape": list(model.output_shape),
         "returned_classes": app.CLASS_NAMES,
-        "class_mapping_and_normalization": "still_require_training_notebook_confirmation",
+        "class_mapping_and_normalization": app.CONTRACT.get("training_evidence", {}).get("status", "unreviewed"),
         "probabilities_sum": round(sum(reference.values()), 6),
         "cold_handler_seconds": round(durations[0], 4),
         "warm_repeats": args.repeats,

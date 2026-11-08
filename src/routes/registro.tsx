@@ -3,8 +3,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import { Logo } from "@/components/skinscan/logo";
+import { EmailConfirmationNotice } from "@/components/skinscan/email-confirmation-notice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/registro")({
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -55,7 +58,12 @@ function RegisterPage() {
           ? "Cuenta creada correctamente."
           : "Revisa tu correo para confirmar tu cuenta.",
       );
-      await navigate({ to: result.session ? "/app" : "/login" });
+      if (result.session) {
+        await navigate({ to: "/app" });
+      } else {
+        setConfirmationEmail(values.email);
+        form.reset();
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pudimos crear tu cuenta. Intenta nuevamente.";
@@ -63,6 +71,26 @@ function RegisterPage() {
       toast.error(message);
     }
   };
+
+  if (confirmationEmail) {
+    return (
+      <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+        <div className="flex flex-col p-8 lg:p-12">
+          <Logo />
+          <div className="flex-1 grid place-items-center py-6">
+            <Card className="w-full max-w-md space-y-5 p-8 border-border/70 shadow-sm">
+              <h1 className="text-2xl font-semibold tracking-tight">Revisa tu correo</h1>
+              <EmailConfirmationNotice email={confirmationEmail} />
+              <Button asChild className="w-full">
+                <Link to="/login">Ya confirmé mi correo: iniciar sesión</Link>
+              </Button>
+            </Card>
+          </div>
+        </div>
+        <AuthSidePanel />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">

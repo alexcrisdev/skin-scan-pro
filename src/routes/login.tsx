@@ -3,15 +3,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Activity, Brain, Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import { Logo } from "@/components/skinscan/logo";
+import { EmailConfirmationNotice } from "@/components/skinscan/email-confirmation-notice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginFormValues } from "@/schemas/loginSchema";
-import { loginUser } from "@/services/auth/login";
+import { LoginError, loginUser } from "@/services/auth/login";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Iniciar sesión — SkinScan" }] }),
@@ -20,6 +22,9 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [failure, setFailure] = useState<{ message: string; code?: string; email: string } | null>(
+    null,
+  );
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -33,6 +38,7 @@ function LoginPage() {
   const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (values: LoginFormValues) => {
+    setFailure(null);
     try {
       await loginUser(values);
       toast.success("Sesión iniciada");
@@ -41,6 +47,11 @@ function LoginPage() {
       const message =
         error instanceof Error ? error.message : "No pudimos iniciar sesion. Intenta nuevamente.";
 
+      setFailure({
+        message,
+        code: error instanceof LoginError ? error.code : undefined,
+        email: values.email.trim(),
+      });
       toast.error(message);
     }
   };
@@ -62,6 +73,21 @@ function LoginPage() {
           <Card className="w-full max-w-md p-8 border-border/70 shadow-sm">
             <h1 className="text-2xl font-semibold tracking-tight">Bienvenido de vuelta</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">Ingresa a tu cuenta de SkinScan</p>
+
+            {failure && (
+              <div className="mt-4">
+                {failure.code === "email_not_confirmed" ? (
+                  <EmailConfirmationNotice key={failure.email} email={failure.email} />
+                ) : (
+                  <p
+                    role="alert"
+                    className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+                  >
+                    {failure.message}
+                  </p>
+                )}
+              </div>
+            )}
 
             <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
               <div className="space-y-2">

@@ -114,6 +114,16 @@ export class AnalysisController {
     return this.getById(context);
   }
 
+  async delete({ params, request }: ControllerContext) {
+    try {
+      const client = await this.currentClient(request);
+      const parsed = analysisIdParamsSchema.parse(params ?? {});
+      return jsonResponse(await this.service.deleteAnalysis(parsed.analysisId, client));
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
   async getByClient({ params, request }: ControllerContext) {
     try {
       const client = await this.currentClient(request);

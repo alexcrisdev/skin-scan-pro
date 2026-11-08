@@ -21,6 +21,41 @@ function findTopPrediction(predictionDetails: Record<string, number>) {
   return entries.reduce((max, current) => (current[1] > max[1] ? current : max), entries[0]);
 }
 
+// Stored links may have expired. Only remove objects from this account's private folder.
+function ownedImagePath(value: string | null, authUserId: string): string | null {
+  if (!value || !process.env.SUPABASE_URL) return null;
+  try {
+    const url = new URL(value);
+    const prefix = "/storage/v1/object/sign/analysis-images/";
+    if (
+      url.origin !== new URL(process.env.SUPABASE_URL).origin ||
+      !url.pathname.startsWith(prefix)
+    ) {
+      return null;
+    }
+    const encoded = url.pathname.slice(prefix.length);
+    if (/%2f|%5c/i.test(encoded)) return null;
+    const path = decodeURIComponent(encoded);
+    const segments = path.split("/");
+    if (
+      segments.length < 2 ||
+      segments[0] !== authUserId ||
+      segments.some(
+        (segment) =>
+          !segment ||
+          segment === "." ||
+          segment === ".." ||
+          segment.includes("\\") ||
+          segment.includes("\0"),
+      )
+    )
+      return null;
+    return path;
+  } catch {
+    return null;
+  }
+}
+
 export class AnalysisService {
   constructor(
     private readonly repository: AnalysisRepository,
@@ -95,6 +130,20 @@ export class AnalysisService {
       status: "success" as const,
       data: await this.mapWithLesion(analysis),
     };
+  }
+
+  async deleteAnalysis(id: string, client: ClientEntity) {
+    const analysis = await this.repository.getAnalysisById(id);
+    if (!analysis || analysis.patient_id) throw new NotFoundError("El análisis no existe.");
+    if (analysis.client_id !== client.id) throw new ForbiddenError("Acceso denegado.");
+
+    const imagePath = ownedImagePath(analysis.image_url, client.auth_user_id);
+    // Keep the record if Storage fails so the user can retry the cleanup.
+    if (imagePath) await this.repository.removeAnalysisImage(imagePath);
+    if (!(await this.repository.deleteAnalysis(id, client.id))) {
+      throw new NotFoundError("El análisis no existe.");
+    }
+    return { status: "success" as const };
   }
 
   async getAnalysesByClient(clientId: string) {

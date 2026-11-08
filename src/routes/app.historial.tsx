@@ -1,7 +1,7 @@
 import { useAnalysisImage } from "@/hooks/use-analysis-image";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { getAppAuth } from "@/lib/auth";
+import { getAppAuth, getIdToken } from "@/lib/auth";
 import { getLesionName } from "@/lib/lesion-names";
 import { onAuthStateChanged } from "@/lib/auth";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -249,11 +249,12 @@ function useAnalysisHistory(statusFilter: string, searchQuery: string, page: num
         )
         .eq("client_id", clientId)
         .is("patient_id", null)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .returns<Analysis[]>();
 
       if (fetchError) throw fetchError;
 
-      let results: Analysis[] = (data ?? []).map((item: any) => ({
+      let results: Analysis[] = (data ?? []).map((item) => ({
         id: item.id,
         image_url: item.image_url,
         confidence: item.confidence,
@@ -291,8 +292,8 @@ function useAnalysisHistory(statusFilter: string, searchQuery: string, page: num
 
       setAnalyses(results);
       setTotalCount(filteredTotal);
-    } catch (err: any) {
-      setError(err.message ?? "Error al cargar el historial.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar el historial.");
     } finally {
       setLoading(false);
     }
@@ -505,6 +506,7 @@ function HistorialPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   // ── NUEVO: estado para confirmación de eliminación ──
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleStatusChange = (val: string) => {
     setStatusFilter(val);
@@ -545,11 +547,12 @@ function HistorialPage() {
       )
       .eq("client_id", clientId)
       .is("patient_id", null)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .returns<Analysis[]>();
 
     if (error) throw error;
 
-    return (data ?? []).map((item: any) => ({
+    return (data ?? []).map((item) => ({
       id: item.id,
       image_url: item.image_url,
       confidence: item.confidence,
@@ -676,18 +679,32 @@ function HistorialPage() {
 
   // ── NUEVO: ejecuta el borrado tras confirmar ──
   const confirmDelete = async () => {
-    if (!deleteId) return;
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from("analyses").delete().eq("id", deleteId);
-
-    if (error) {
-      toast.error("No se pudo eliminar el análisis.");
-    } else {
+    if (!deleteId || deleting) return;
+    setDeleting(true);
+    try {
+      const token = await getIdToken();
+      const response = await fetch(`/api/analyses/${deleteId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.status !== "success") {
+        throw new Error(
+          result?.message || "No se pudo eliminar el análisis. Inténtalo nuevamente.",
+        );
+      }
       toast.success("Análisis eliminado.");
-      if (selectedAnalysis?.id === deleteId) setSheetOpen(false);
+      if (selectedAnalysis?.id === deleteId) {
+        setSheetOpen(false);
+        setSelectedAnalysis(null);
+      }
+      setDeleteId(null);
       refetch();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo eliminar el análisis.");
+    } finally {
+      setDeleting(false);
     }
-    setDeleteId(null);
   };
 
   return (
@@ -930,7 +947,7 @@ function HistorialPage() {
       />
 
       {/* ── NUEVO: Dialog de confirmación de eliminación ── */}
-      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <Dialog open={!!deleteId} onOpenChange={(open) => !open && !deleting && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Eliminar análisis</DialogTitle>
@@ -943,11 +960,12 @@ function HistorialPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>
+            <Button variant="outline" disabled={deleting} onClick={() => setDeleteId(null)}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Eliminar
+            <Button variant="destructive" disabled={deleting} onClick={confirmDelete}>
+              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleting ? "Eliminando…" : "Eliminar"}
             </Button>
           </DialogFooter>
         </DialogContent>

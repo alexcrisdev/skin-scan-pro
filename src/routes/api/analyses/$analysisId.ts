@@ -15,6 +15,10 @@ export const Route = createFileRoute("/api/analyses/$analysisId")({
         const controller = await getController();
         return controller.getById({ params, request });
       },
+      DELETE: async ({ params, request }) => {
+        const controller = await getController();
+        return controller.delete({ params, request });
+      },
     },
   },
 });

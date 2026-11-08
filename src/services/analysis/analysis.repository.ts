@@ -129,6 +129,32 @@ export class AnalysisRepository {
     return (data as AnalysisEntity | null) ?? null;
   }
 
+  async removeAnalysisImage(path: string) {
+    const { error } = await this.supabase.storage.from("analysis-images").remove([path]);
+    if (error) {
+      throw new AnalysisError(
+        "No se pudo eliminar la imagen del análisis. Inténtalo nuevamente.",
+        503,
+      );
+    }
+  }
+
+  async deleteAnalysis(id: string, clientId: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("analyses")
+      .delete()
+      .eq("id", id)
+      .eq("client_id", clientId)
+      .is("patient_id", null)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      throw new AnalysisError("No se pudo eliminar el análisis. Inténtalo nuevamente.");
+    }
+    return data !== null;
+  }
+
   async getAnalysesByClient(clientId: string): Promise<AnalysisEntity[]> {
     const { data, error } = await this.supabase
       .from("analyses")

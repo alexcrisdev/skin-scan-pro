@@ -8,7 +8,7 @@ globalThis.localStorage = { setItem: (key, value) => storage.set(key, value) };
 const bundle = await build({
   stdin: {
     contents: `export { loginUser, LoginError } from "./src/services/auth/login.ts";
-      export { registerUser, resendSignupConfirmation } from "./src/services/auth/register.ts";`,
+      export { registerUser } from "./src/services/auth/register.ts";`,
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -31,13 +31,13 @@ const bundle = await build({
     },
   ],
 });
-const { loginUser, LoginError, registerUser, resendSignupConfirmation } = await import(
+const { loginUser, LoginError, registerUser } = await import(
   `data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`
 );
 
-test("login distinguishes unconfirmed email, bad credentials, rate limits and unavailable Auth", async () => {
+test("login distinguishes unavailable accounts, bad credentials, rate limits and unavailable Auth", async () => {
   for (const [code, status, expected] of [
-    ["email_not_confirmed", 400, /Confirma tu correo/],
+    ["email_not_confirmed", 400, /cuenta aún no está habilitada/],
     ["invalid_credentials", 400, /correo o la contraseña/],
     ["over_request_rate_limit", 429, /límite/],
     ["unexpected_failure", 503, /no está disponible/],
@@ -86,14 +86,14 @@ test("successful login keeps the selected persistence and trims only the email",
   assert.equal(storage.get("skinscan-remember"), "false");
 });
 
-test("registration preserves a pending confirmation without fabricating a session", async () => {
-  const pending = { user: { id: "pending-user" }, session: null };
+test("registration preserves the immediate session and profile metadata", async () => {
+  const registered = { user: { id: "new-user" }, session: { access_token: "test-session" } };
   let received;
   globalThis.__skinscanTestClient = {
     auth: {
       signUp: async (values) => {
         received = values;
-        return { data: pending, error: null };
+        return { data: registered, error: null };
       },
     },
   };
@@ -103,33 +103,8 @@ test("registration preserves a pending confirmation without fabricating a sessio
       password: "test password",
       name: "Test person",
     }),
-    pending,
+    registered,
   );
   assert.equal(received.options.data.name, "Test person");
-  assert.equal(pending.session, null);
-});
-
-test("confirmation resend uses signup and reports delivery limits without a false success", async () => {
-  let calls = 0;
-  let received;
-  globalThis.__skinscanTestClient = {
-    auth: {
-      resend: async (values) => {
-        calls++;
-        received = values;
-        return { error: null };
-      },
-    },
-  };
-  assert.equal(calls, 0);
-  await resendSignupConfirmation(" person@example.com ");
-  assert.equal(calls, 1);
-  assert.deepEqual(received, { type: "signup", email: "person@example.com" });
-  globalThis.__skinscanTestClient.auth.resend = async () => ({
-    error: { code: "over_email_send_rate_limit", status: 429 },
-  });
-  await assert.rejects(
-    resendSignupConfirmation("person@example.com"),
-    /límite.*Inténtalo más tarde/,
-  );
+  assert.equal(registered.session.access_token, "test-session");
 });

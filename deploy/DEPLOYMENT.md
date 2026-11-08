@@ -84,12 +84,17 @@ mismo contrato HTTP si después se necesita reducir la latencia de arranque.
    políticas y conservan datos históricos; no son una importación automática.
 3. Comprueba las siete filas de `lesion_types`, las tablas `usuarios`, `analyses`
    y `analysis_attempts`, RLS habilitado y bucket privado `analysis-images`.
-4. Habilita acceso por correo/contraseña. En Auth → URL Configuration configura
+4. Habilita acceso por correo/contraseña y desactiva **Confirm email** para el
+   flujo actual de registro con acceso inmediato, sin envío de activación.
+   Está declarado como `enable_confirmations = false` tanto en `[auth.email]`
+   como en `[remotes.production.auth.email]`. La recuperación de contraseña
+   continúa enviando correo y depende de la disponibilidad del proveedor.
+   En Auth → URL Configuration configura
    Site URL con tu dominio y autoriza la URL exacta `/restablecer` del entorno.
    Para desarrollo autoriza también `http://localhost:5173/restablecer` o el
    puerto que indique Vite. Usa un dominio estable de pruebas para los correos.
 5. Registra dos cuentas nuevas: cada una debe ver únicamente su historial e
-   imágenes. Comprueba confirmación de correo y recuperación de contraseña.
+   imágenes. Comprueba registro con sesión inmediata y recuperación de contraseña.
 
 La configuración reproducible está en `supabase/config.toml`. Incluye URLs
 locales y el dominio de producción en `[remotes.production]`. La CLI conserva
@@ -181,7 +186,7 @@ Para el servidor Node normal: `npm.cmd run build` y `npm.cmd start`.
 
 ## 4. Comprobar de extremo a extremo
 
-- Registro, confirmación, login, logout y recuperación en el dominio desplegado.
+- Registro con sesión inmediata, login, logout y recuperación en el dominio desplegado.
 - Crear un análisis con imagen de prueba: inferencia real, registro en base,
   imagen accesible solo para el dueño, historial y PDF.
 - Cuenta B no puede acceder al análisis ni a la imagen de A, ni alterando IDs.

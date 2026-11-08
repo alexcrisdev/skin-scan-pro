@@ -24,7 +24,7 @@ Al abrir `/` se muestra directamente `/app`. Sin sesión, el panel funciona como
 
 `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` son públicas y se configuran antes del build. `SUPABASE_SERVICE_ROLE_KEY` y la credencial de inferencia pertenecen exclusivamente al servidor y se leen en tiempo de ejecución. No las prefijes con `VITE_`.
 
-El registro crea el perfil mediante un trigger. Con confirmación por correo habilitada, se pide confirmar antes del login. La recuperación redirige a `/restablecer` para definir la nueva contraseña.
+El registro crea el perfil mediante un trigger e inicia sesión directamente. La confirmación de correo está deshabilitada en `bd_skin_scan` y en `supabase/config.toml`: el alta no envía un enlace de activación. La recuperación de contraseña sigue usando correo y redirige a `/restablecer`.
 
 El registro solicita nombre, correo y contraseña, sin rol ni perfil médico. Los análisis nuevos quedan asociados a la identidad autenticada, sin seleccionar otra persona. Se retiraron Gestión de personas, sus APIs y los filtros de pacientes del historial. Los registros antiguos asociados a pacientes se conservan para revisión administrativa y no se reasignan a la cuenta ni aparecen como análisis propios.
 

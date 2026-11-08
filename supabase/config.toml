@@ -11,9 +11,15 @@ enabled = false
 site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173/restablecer"]
 
+[auth.email]
+enable_confirmations = false
+
 [remotes.production]
 project_id = "lzmwczcqdmsgwjprvqwb"
 
 [remotes.production.auth]
 site_url = "https://skin-scan-pro.vercel.app"
 additional_redirect_urls = ["https://skin-scan-pro.vercel.app/restablecer", "http://localhost:5173/restablecer"]
+
+[remotes.production.auth.email]
+enable_confirmations = false

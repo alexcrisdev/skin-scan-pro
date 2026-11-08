@@ -14,18 +14,3 @@ export async function registerUser(values: RegisterFormValues) {
     );
   return data;
 }
-
-export async function resendSignupConfirmation(email: string) {
-  const { error } = await getSupabaseClient().auth.resend({
-    type: "signup",
-    email: email.trim(),
-  });
-  if (error) {
-    throw new RegisterError(
-      authErrorMessage(
-        error,
-        "No se pudo reenviar el correo de confirmación. Inténtalo nuevamente.",
-      ),
-    );
-  }
-}

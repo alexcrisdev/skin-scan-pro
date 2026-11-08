@@ -6,14 +6,13 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 import { Logo } from "@/components/skinscan/logo";
-import { EmailConfirmationNotice } from "@/components/skinscan/email-confirmation-notice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginFormValues } from "@/schemas/loginSchema";
-import { LoginError, loginUser } from "@/services/auth/login";
+import { loginUser } from "@/services/auth/login";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Iniciar sesión — SkinScan" }] }),
@@ -22,9 +21,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [failure, setFailure] = useState<{ message: string; code?: string; email: string } | null>(
-    null,
-  );
+  const [failure, setFailure] = useState<string | null>(null);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -47,11 +44,7 @@ function LoginPage() {
       const message =
         error instanceof Error ? error.message : "No pudimos iniciar sesion. Intenta nuevamente.";
 
-      setFailure({
-        message,
-        code: error instanceof LoginError ? error.code : undefined,
-        email: values.email.trim(),
-      });
+      setFailure(message);
       toast.error(message);
     }
   };
@@ -75,18 +68,12 @@ function LoginPage() {
             <p className="mt-1.5 text-sm text-muted-foreground">Ingresa a tu cuenta de SkinScan</p>
 
             {failure && (
-              <div className="mt-4">
-                {failure.code === "email_not_confirmed" ? (
-                  <EmailConfirmationNotice key={failure.email} email={failure.email} />
-                ) : (
-                  <p
-                    role="alert"
-                    className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-                  >
-                    {failure.message}
-                  </p>
-                )}
-              </div>
+              <p
+                role="alert"
+                className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+              >
+                {failure}
+              </p>
             )}
 
             <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalid)}>

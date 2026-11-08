@@ -1,4 +1,5 @@
 import { useAnalysisImage } from "@/hooks/use-analysis-image";
+import { getLesionName } from "@/lib/lesion-names";
 import { Link } from "@tanstack/react-router";
 import { onAuthStateChanged } from "@/lib/auth";
 import {
@@ -261,7 +262,7 @@ function getDistribution(analyses: RecentAnalysis[]) {
   );
 
   const lesionCounts = analyses.reduce<Record<string, number>>((acc, analysis) => {
-    const label = analysis.lesion_types?.description ?? "Desconocido";
+    const label = getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description);
     acc[label] = (acc[label] ?? 0) + 1;
     return acc;
   }, {});
@@ -727,8 +728,8 @@ function RecentActivitySection() {
                 <Thumbnail url={r.image_url} />
 
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">
-                    {r.lesion_types?.description ?? "Desconocido"}
+                  <div className="break-words text-sm font-medium">
+                    {getLesionName(r.lesion_types?.name, r.lesion_types?.description)}
                   </div>
                   <div className="truncate text-xs text-muted-foreground">
                     {Number(r.confidence).toFixed(1)}% confianza

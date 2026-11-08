@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MAX_ANALYSIS_BASE64_LENGTH } from "../../lib/analysis-limits";
+import { LESION_NAMES } from "../../lib/lesion-names";
 
 export const ALLOWED_IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -8,15 +9,7 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
   "image/webp",
 ] as const;
 
-export const lesionNameDescriptions: Record<string, string> = {
-  nv: "Nevus",
-  mel: "Melanoma",
-  bkl: "Queratosis benigna",
-  bcc: "Carcinoma basocelular",
-  akiec: "Queratosis actinica",
-  vasc: "Lesion vascular",
-  df: "Dermatofibroma",
-};
+export const lesionNameDescriptions = LESION_NAMES;
 
 export const createAnalysisRequestSchema = z
   .object({

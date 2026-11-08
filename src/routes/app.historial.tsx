@@ -2,6 +2,7 @@ import { useAnalysisImage } from "@/hooks/use-analysis-image";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getAppAuth } from "@/lib/auth";
+import { getLesionName } from "@/lib/lesion-names";
 import { onAuthStateChanged } from "@/lib/auth";
 import { getSupabaseClient } from "@/lib/supabase";
 import { PageHeader } from "@/components/skinscan/app-layout";
@@ -279,8 +280,9 @@ function useAnalysisHistory(statusFilter: string, searchQuery: string, page: num
         const q = searchQuery.toLowerCase();
         results = results.filter(
           (r) =>
-            r.lesion_types?.description.toLowerCase().includes(q) ||
-            shortId(r.id).toLowerCase().includes(q),
+            getLesionName(r.lesion_types?.name, r.lesion_types?.description)
+              .toLowerCase()
+              .includes(q) || shortId(r.id).toLowerCase().includes(q),
         );
       }
 
@@ -375,7 +377,7 @@ function AnalysisDetailSheet({
                 Resultado
               </p>
               <p className="font-semibold text-base">
-                {analysis.lesion_types?.description ?? "Desconocido"}
+                {getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description)}
               </p>
             </div>
 
@@ -431,8 +433,10 @@ function AnalysisDetailSheet({
                     .map(([label, value]) => (
                       <div key={label}>
                         <div className="flex items-center justify-between gap-3 mb-1">
-                          <span className="text-sm font-medium truncate">{label}</span>
-                          <span className="text-xs text-muted-foreground tabular-nums">
+                          <span className="min-w-0 break-words text-sm font-medium">
+                            {getLesionName(label)}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                             {Number(value).toFixed(1)}%
                           </span>
                         </div>
@@ -785,7 +789,7 @@ function HistorialPage() {
                         <AnalysisThumbnail url={r.image_url} />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {r.lesion_types?.description ?? "Desconocido"}
+                        {getLesionName(r.lesion_types?.name, r.lesion_types?.description)}
                         <div className="text-[11px] text-muted-foreground font-mono">
                           {shortId(r.id)}
                         </div>
@@ -850,8 +854,8 @@ function HistorialPage() {
                   <AnalysisThumbnail url={r.image_url} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="font-medium truncate text-sm">
-                        {r.lesion_types?.description ?? "Desconocido"}
+                      <div className="min-w-0 break-words font-medium text-sm">
+                        {getLesionName(r.lesion_types?.name, r.lesion_types?.description)}
                       </div>
                       <DerivedStatusBadge lesionName={r.lesion_types?.name} />
                     </div>

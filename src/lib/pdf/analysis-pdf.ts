@@ -1,5 +1,6 @@
 import { getIdToken } from "@/lib/auth";
 import { resolveAnalysisImageUrl } from "@/lib/analysis-images";
+import { getLesionName } from "@/lib/lesion-names";
 import { jsPDF } from "jspdf";
 
 type AnalysisPdfRecord = {
@@ -430,7 +431,7 @@ function drawPredictionBars(doc: jsPDF, predictionDetails: Record<string, number
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.text);
     doc.setFont("helvetica", "normal");
-    doc.text(label, PAGE_MARGIN, currentY);
+    doc.text(getLesionName(label), PAGE_MARGIN, currentY);
     doc.text(`${value.toFixed(1)}%`, PAGE_MARGIN + CONTENT_WIDTH, currentY, { align: "right" });
     currentY += 2.5;
 
@@ -474,7 +475,7 @@ async function drawAnalysisCard(
   total: number,
   y: number,
 ) {
-  const title = analysis.lesion_types?.description ?? "Desconocido";
+  const title = getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description);
   const status = classifyLesion(analysis.lesion_types?.name);
   const dateText = formatDateTime(analysis.analyzed_at ?? analysis.created_at);
 
@@ -611,7 +612,7 @@ function drawSingleAnalysisCover(
   userName: string,
   generatedAt: string,
 ) {
-  const title = analysis.lesion_types?.description ?? "Análisis";
+  const title = getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description);
   const status = classifyLesion(analysis.lesion_types?.name);
   const pageTop = 16;
 
@@ -677,7 +678,7 @@ function drawSingleAnalysisCover(
 
 function drawDetailIntroSection(doc: jsPDF, analysis: AnalysisPdfRecord, y: number) {
   const status = classifyLesion(analysis.lesion_types?.name);
-  const title = analysis.lesion_types?.description ?? "Desconocido";
+  const title = getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description);
 
   y = drawSectionTitle(doc, "Resumen visual", y);
   doc.setFillColor(...COLORS.white);
@@ -727,7 +728,11 @@ function drawStyledDetailSection(doc: jsPDF, analysis: AnalysisPdfRecord, y: num
   doc.setTextColor(...COLORS.text);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10.5);
-  doc.text(titleCase(analysis.lesion_types?.description ?? "Análisis"), PAGE_MARGIN + 4, y + 13);
+  doc.text(
+    titleCase(getLesionName(analysis.lesion_types?.name, analysis.lesion_types?.description)),
+    PAGE_MARGIN + 4,
+    y + 13,
+  );
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.muted);
   doc.setFontSize(8.5);

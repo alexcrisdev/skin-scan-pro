@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getIdToken } from "@/lib/auth";
 import { MAX_ANALYSIS_IMAGE_BYTES } from "@/lib/analysis-limits";
+import { getLesionName } from "@/lib/lesion-names";
 import {
   Camera,
   Calendar,
@@ -388,7 +389,7 @@ function AnalysisPage() {
                 <div>
                   <div className="text-xs text-muted-foreground">Tipo detectado</div>
                   <div className="text-lg font-semibold mt-0.5">
-                    {result.lesion_description ?? result.lesion_name}
+                    {getLesionName(result.lesion_name, result.lesion_description)}
                   </div>
                 </div>
                 <StatusBadge status="Completado" />
@@ -408,22 +409,29 @@ function AnalysisPage() {
                 <div className="text-xs font-medium text-muted-foreground mb-2">Probabilidades</div>
                 <div className="space-y-2">
                   {predictionEntries.map(([code, value], index) => (
-                    <div key={code} className="flex items-center gap-3 text-xs">
-                      {index === 0 ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                      ) : (
-                        <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
-                      <span className="flex-1 truncate">{code}</span>
-                      <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      key={code}
+                      className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 text-xs"
+                    >
+                      <div className="flex min-w-0 items-start gap-2">
+                        {index === 0 ? (
+                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                        ) : (
+                          <Circle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="min-w-0 break-words leading-relaxed">
+                          {getLesionName(code)}
+                        </span>
+                      </div>
+                      <span className="text-right text-muted-foreground tabular-nums">
+                        {formatPercent(value)}
+                      </span>
+                      <div className="col-span-2 h-1.5 rounded-full bg-muted overflow-hidden">
                         <div
                           className={cn("h-full", index === 0 ? "bg-primary" : "bg-primary/50")}
                           style={{ width: `${Math.min(value, 100)}%` }}
                         />
                       </div>
-                      <span className="w-12 text-right text-muted-foreground">
-                        {formatPercent(value)}
-                      </span>
                     </div>
                   ))}
                 </div>

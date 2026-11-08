@@ -12,7 +12,7 @@ Aplicación React 19 y TanStack Start para clasificar imágenes de lesiones cut�
 
 La clasificación sirve de apoyo a una evaluación profesional; el porcentaje del modelo no constituye un diagnóstico.
 
-Al abrir `/` se muestra directamente `/app`. Sin sesión, el panel funciona como vista previa vacía; las APIs siguen exigiendo autenticación para operar sobre datos. El login permanece en `/login` y la presentación en `/presentacion`. No hay roles de usuario asociados a planes. Para una base existente, aplica también `202611070001_remove_profile_roles.sql`.
+Al abrir `/` se muestra la landing informativa de SkinScan. Su botón **Iniciar sesión** lleva a `/login` y, tras autenticarse, se abre `/app`. La antigua URL `/presentacion` redirige a `/`. El registro permanece en `/registro`. Si se accede directamente al panel sin sesión, funciona como vista previa vacía; las APIs exigen autenticación para operar sobre datos. No hay roles de usuario asociados a planes. Para una base existente, aplica también `202611070001_remove_profile_roles.sql`.
 
 ## Configuración local
 

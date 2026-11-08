@@ -39,7 +39,7 @@ function LoginPage() {
     try {
       await loginUser(values);
       toast.success("Sesión iniciada");
-      await navigate({ to: "/dashboard" });
+      await navigate({ to: "/app" });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pudimos iniciar sesion. Intenta nuevamente.";

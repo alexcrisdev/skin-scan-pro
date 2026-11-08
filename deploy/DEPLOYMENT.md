@@ -11,6 +11,7 @@ Revisión del 7 de noviembre de 2026 sobre `f963a15`, rama de origen
 | Supabase Auth | Registro, acceso y recuperación | Cliente web y validación de tokens en servidor |
 | Supabase PostgreSQL | Perfiles, categorías e historial personal | Cuatro migraciones con políticas RLS |
 | Supabase Storage | Fotografías privadas por UUID del usuario | Bucket `analysis-images`, carga directa y enlaces firmados |
+| Render Free + LiteRT | Inferencia ligera para demostraciones | API Docker probada bajo 512 MiB; falta crear el servicio en Render |
 | AWS Lambda + ECR | Inferencia TensorFlow CPU | Handler Python y Dockerfile existentes |
 
 Flujo: navegador → Storage privado; navegador → `/api/analyses` con token e
@@ -111,6 +112,15 @@ antes de `config push`. No ejecutes `db reset` contra producción. En CLI 3, los
 comandos de base de datos sin `--remote` apuntan a la base local.
 
 ## 2. Ejecutar y desplegar la CNN
+
+Para la alternativa gratuita elegida para las pruebas actuales, sigue la
+[guía de Render + LiteRT](render/README.md). El TFLite suministrado pasó la
+comparación con Keras en ocho entradas sintéticas y seis pruebas bajo 0,1 CPU
+y 512 MiB. La prueba HTTP consumió unos 91 MiB. El artefacto está en el bucket
+privado `inference-models` de `bd_skin_scan`; aún falta crear el servicio en
+Render y configurar su URL en Vercel. No se crearon recursos AWS.
+
+### Alternativa con AWS Lambda
 
 Sigue [la guía de Lambda](lambda/README.md). El modelo local no se sube mediante
 Git: el build Docker lo incorpora a la imagen que se envía al ECR privado.

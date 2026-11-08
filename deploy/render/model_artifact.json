@@ -1,0 +1,7 @@
+{
+  "filename": "model.tflite",
+  "sha256": "134074b6a8570e7092436ebf85b40e734e8aa06da2c64df84f9363cfb8e014e1",
+  "bytes": 14147516,
+  "bucket": "inference-models",
+  "object_path": "mobilenetv2/134074b6a8570e7092436ebf85b40e734e8aa06da2c64df84f9363cfb8e014e1.tflite"
+}

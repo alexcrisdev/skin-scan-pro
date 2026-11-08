@@ -26,6 +26,8 @@ Microsoft/Windows/PowerShell/ModuleAnalysisCache
 .npm-cache/
 deploy/lambda/model.keras
 deploy/lambda/*.tflite
+deploy/render/*.tflite
+deploy/render/.local/
 **/__pycache__/
 AGENTS.md
 # Wrangler / Cloudflare

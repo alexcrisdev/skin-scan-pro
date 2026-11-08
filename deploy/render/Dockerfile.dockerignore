@@ -1,0 +1,10 @@
+**
+!deploy/
+!deploy/render/
+!deploy/render/requirements.txt
+!deploy/render/app.py
+!deploy/render/model_store.py
+!deploy/render/model_artifact.json
+!deploy/lambda/
+!deploy/lambda/lambda_function.py
+!deploy/lambda/model_contract.json
